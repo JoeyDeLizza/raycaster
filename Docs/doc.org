@@ -1,0 +1,2 @@
+#+AUTHOR: Joey DeLizza
+* TinyRaycaster Documnetation
