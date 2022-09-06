@@ -1,4 +1,4 @@
-OBJS= tgaimage.o
+OBJS=
 
 all: $(OBJS)
 	g++ main.cpp $(OBJS)
