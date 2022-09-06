@@ -51,7 +51,6 @@ void drop_ppm_image(const std::string filename, const std::vector<uint32_t> pixe
 
   for(int i = 0; i < h*w; i++) {
       uint8_t r, g, b, a;
-      std::cout << i << std::endl;
       unpack_color(pixels.at(i), r, g, b, a);
       file << static_cast<char>(r) << static_cast<char>(g) << static_cast<char>(b);
   }

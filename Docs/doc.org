@@ -1,2 +1,13 @@
 #+AUTHOR: Joey DeLizza
 * TinyRaycaster Documnetation
+
+This program feautres a rudimentray way to render crude 3D images similar
+to the way old games like Wolfenstein and Doom.
+
+
+** Functions
+
+#+begin_src c++
+  // 
+  void drop_ppm_image(const std::string filename, const std::vector<uint32_t> pixels, int h, int w);
+#+end_src
