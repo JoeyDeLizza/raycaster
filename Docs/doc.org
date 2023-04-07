@@ -1,7 +1,7 @@
 #+AUTHOR: Joey DeLizza
 * TinyRaycaster Documnetation
 
-This program feautres a rudimentray way to render crude 3D images similar
+This program feautres a rudimentray way to render 3D images similar
 to the way old games like Wolfenstein and Doom.
 
 
