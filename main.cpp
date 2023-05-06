@@ -59,6 +59,9 @@ int main(int argc, char **argv) {
   //Event handler
   SDL_Event e;
 
+
+  int wid, hei;
+
   //Initialize SDL
   if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
     {
@@ -67,12 +70,15 @@ int main(int argc, char **argv) {
   else
     {
       //Create window
-      window = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN );
-      // SDL_SetWindowSize(window , w*2,
+      window = SDL_CreateWindow( "Raycaster", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+      // Sdl_SetWindowSize(window , w*2,
       //		     h);
       //Create renderer for window
       //The window renderer
       SDL_Renderer* gRenderer = NULL;
+      
+      gRenderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED );
+
       
 
       if( window == NULL )
@@ -84,31 +90,115 @@ int main(int argc, char **argv) {
 	  //While application is running
             while( !quit )
             {
+
+	      SDL_RenderSetLogicalSize(gRenderer, 512, 512);
+
+	      SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+	      SDL_RenderClear( gRenderer );
+
+
+	      SDL_Rect outlineRect = {w/ 6, h/ 6, w* 2 / 3, h* 2 / 3 };
+	      SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x0, 0xFF );  
+	      SDL_RenderDrawRect( gRenderer, &outlineRect );
+	      //SDL_UpdateWindowSurface( window );
+	      SDL_RenderPresent( gRenderer);
+
+
+
                 //Handle events on queue
                 while( SDL_PollEvent( &e ) != 0 )
                 {
+		  
                     //User requests quit
                     if( e.type == SDL_QUIT )
                     {
                         quit = true;
                     }
-                }
-	  //Get window surface
-	  // screenSurface = SDL_GetWindowSurface( window );
+
+
+
+		    if (e.type == SDL_WINDOWEVENT) {
+		      switch (e.window.event) {
+		      case SDL_WINDOWEVENT_SHOWN:
+			std::cout << "shown" << std::endl;
+			break;
+		      case SDL_WINDOWEVENT_HIDDEN:
+			std::cout << "Hidden" << std::endl;
+			break;
+		      case SDL_WINDOWEVENT_EXPOSED:
+			std::cout << "Exposed" << std::endl;
+			break;
+		      case SDL_WINDOWEVENT_MOVED:
+			std::cout << "Moved" << std::endl;
+			break;
+		      case SDL_WINDOWEVENT_RESIZED:
+			std::cout << "Resized" << std::endl;
+			//SDL_GetWindowSize(window, &wid, &hei);
+			//SDL_SetWindowSize(window, wid, hei);
+			std::cout << w << h;
+	      SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x0, 0xFF );  
+	      SDL_RenderDrawRect( gRenderer, &outlineRect );
+
+			
+			//	SDL_RenderClear( gRenderer );
+			//SDL_RenderPresent( gRenderer );
+			break;
+		      case SDL_WINDOWEVENT_SIZE_CHANGED:
+			std::cout << "Size changed:" << std::endl;
+			break;
+		      case SDL_WINDOWEVENT_MINIMIZED:
+			std::cout << "Minim" << std::endl;
+			break;
+		      case SDL_WINDOWEVENT_MAXIMIZED:
+			std::cout << "Maxim" << std::endl;
+			break;
+		      case SDL_WINDOWEVENT_RESTORED:
+			std::cout << "Restored" << std::endl;
+			break;
+		      case SDL_WINDOWEVENT_ENTER:
+			//std::cout << "Here" << std::endl;
+			break;
+		      case SDL_WINDOWEVENT_LEAVE:
+			//std::cout << "Here" << std::endl;
+			break;
+		      case SDL_WINDOWEVENT_FOCUS_GAINED:
+			std::cout << "Focused" << std::endl;
+			break;
+		      case SDL_WINDOWEVENT_FOCUS_LOST:
+			//std::cout << "Here" << std::endl;
+			break;
+		      case SDL_WINDOWEVENT_CLOSE:
+			std::cout << "Closed" << std::endl;
+			break;
+		      }
+		    }
+		}
+		//Get window surface
+		//screenSurface = SDL_GetWindowSurface( window );
+
+		//get window size
+		//SDL_GetRendererOutputSize(gRenderer, &wid, &hei);
 	  
-	  //Fill the surface white
-	  //SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0xFF, 0xFF, 0xFF ) );
+		//Fill the surface white
+		//SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface.format, 0xFF, 0xFF, 0xFF ) );
             
-	  //Update the surface
-	  //SDL_UpdateWindowSurface( window );
+		//Update the surface
+		//SDL_UpdateWindowSurface( window );
+
+
 
 	  
-	  gRenderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED );
-	  render(gRenderer, h, w);
+	      	// Grenderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED );
+		
+		//Render(Grenderer, h, w);
 	    }
         }
-    }
+    }	
   //Destroy window
+
+
+  std::cout << wid << hei;
+  
   SDL_DestroyWindow( window );
 
   //Quit SDL subsystems
