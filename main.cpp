@@ -50,8 +50,13 @@ int main(int argc, char **argv) {
   SDL_Window* window = NULL;
     
   //The surface contained by the window
-  SDL_Surface* screenSurface = NULL;
-  printf("HERE");
+
+  SDL_Surface *screen = SDL_CreateRGBSurface(0, 512, 512, 32,
+					     0x00FF0000,
+					     0x0000FF00,
+					     0x000000FF,
+					     0xFF000000);
+  SDL_memset(((uint32_t*)screen->pixels)+200, 0xFFFFFFFF, screen->h );
 
   //Main loop flag
   bool quit = false;
@@ -80,6 +85,11 @@ int main(int argc, char **argv) {
       gRenderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED );
 
       
+  
+      SDL_Texture *texture = SDL_CreateTexture(gRenderer,
+					       SDL_PIXELFORMAT_ARGB8888,
+					       SDL_TEXTUREACCESS_STREAMING,
+					       512, 512);
 
       if( window == NULL )
         {
@@ -91,19 +101,11 @@ int main(int argc, char **argv) {
             while( !quit )
             {
 
-	      SDL_RenderSetLogicalSize(gRenderer, 512, 512);
 
-	      SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-	      SDL_RenderClear( gRenderer );
-
-
-	      SDL_Rect outlineRect = {w/ 6, h/ 6, w* 2 / 3, h* 2 / 3 };
-	      SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x0, 0xFF );  
-	      SDL_RenderDrawRect( gRenderer, &outlineRect );
-	      //SDL_UpdateWindowSurface( window );
-	      SDL_RenderPresent( gRenderer);
-
-
+	      SDL_UpdateTexture(texture, NULL, screen->pixels, screen->pitch);
+	      SDL_RenderClear(gRenderer);
+	      SDL_RenderCopy(gRenderer, texture, NULL, NULL);
+	      SDL_RenderPresent(gRenderer);
 
                 //Handle events on queue
                 while( SDL_PollEvent( &e ) != 0 )
@@ -136,8 +138,7 @@ int main(int argc, char **argv) {
 			//SDL_GetWindowSize(window, &wid, &hei);
 			//SDL_SetWindowSize(window, wid, hei);
 			std::cout << w << h;
-	      SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x0, 0xFF );  
-	      SDL_RenderDrawRect( gRenderer, &outlineRect );
+
 
 			
 			//	SDL_RenderClear( gRenderer );
