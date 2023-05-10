@@ -49,15 +49,6 @@ int main(int argc, char **argv) {
   //The window we'll be rendering to
   SDL_Window* window = NULL;
     
-  //The surface contained by the window
-
-  SDL_Surface *screen = SDL_CreateRGBSurface(0, 512, 512, 32,
-					     0x00FF0000,
-					     0x0000FF00,
-					     0x000000FF,
-					     0xFF000000);
-  SDL_memset(((uint32_t*)screen->pixels)+200, 0xFFFFFFFF, screen->h );
-
   //Main loop flag
   bool quit = false;
 
@@ -75,21 +66,35 @@ int main(int argc, char **argv) {
   else
     {
       //Create window
-      window = SDL_CreateWindow( "Raycaster", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+      window = SDL_CreateWindow( "Raycaster", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN );
       // Sdl_SetWindowSize(window , w*2,
       //		     h);
       //Create renderer for window
       //The window renderer
       SDL_Renderer* gRenderer = NULL;
+
+  //The surface contained by the window
+
+
       
       gRenderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED );
 
+      SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
+      SDL_RenderSetLogicalSize(gRenderer, 512, 512);
+
       
-  
+
       SDL_Texture *texture = SDL_CreateTexture(gRenderer,
-					       SDL_PIXELFORMAT_ARGB8888,
+					       SDL_PIXELFORMAT_ARGB32,
 					       SDL_TEXTUREACCESS_STREAMING,
 					       512, 512);
+      SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormat(0, 512, 512, 32, SDL_PIXELFORMAT_ARGB32);
+      draw_pixel(surface, 0, 512/2);
+      SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
+      SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+      SDL_RenderClear(gRenderer);
+      SDL_RenderCopy(gRenderer, texture, NULL, NULL);
+      SDL_RenderPresent(gRenderer);
 
       if( window == NULL )
         {
@@ -97,15 +102,15 @@ int main(int argc, char **argv) {
         }
       else
         {
-	  //While application is running
+	  //While application is runninG
             while( !quit )
             {
 
 
-	      SDL_UpdateTexture(texture, NULL, screen->pixels, screen->pitch);
-	      SDL_RenderClear(gRenderer);
-	      SDL_RenderCopy(gRenderer, texture, NULL, NULL);
-	      SDL_RenderPresent(gRenderer);
+	      // SDL_UpdateTexture(texture, NULL, screen->pixels, screen->pitch);
+	      //  SDL_RenderClear(gRenderer);
+	      // SDL_RenderCopy(gRenderer, texture, NULL, NULL);
+	      // SDL_RenderPresent(gRenderer);
 
                 //Handle events on queue
                 while( SDL_PollEvent( &e ) != 0 )
