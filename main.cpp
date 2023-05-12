@@ -1,13 +1,15 @@
-#include <iostream>
-#include <fstream>
-#include <ostream>
-#include <sys/types.h>
-#include <vector>
-#include <cstdint>
-#include <cassert>
-#include "graphics.h"
-#include "map.h"
-#include "SDL2/SDL.h"
+//#include <iostream>
+//#include <fstream>
+//#include <ostream>
+//#include <sys/types.h>
+//#include <vector>
+//#include <cstdint>
+//#include <cassert>
+//#include "graphics.h"
+//#include "map.h"
+//#include "SDL2/SDL.h"
+#include "core.h"
+#include "lineseg.h"
 
 
 uint32_t pack_color(const uint8_t r, const uint8_t g, const uint8_t b,
@@ -48,6 +50,11 @@ int main(int argc, char **argv) {
 
   //The window we'll be rendering to
   SDL_Window* window = NULL;
+
+
+  SDL_Renderer* gRenderer = NULL;
+  SDL_Surface* surface = NULL;
+  SDL_Texture* texture = NULL;
     
   //Main loop flag
   bool quit = false;
@@ -57,156 +64,206 @@ int main(int argc, char **argv) {
 
 
   int wid, hei;
-
+  initialize(&window, &gRenderer, &surface, &texture); 
   //Initialize SDL
-  if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
-    {
-      printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
-    }
-  else
-    {
-      //Create window
-      window = SDL_CreateWindow( "Raycaster", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN );
-      // Sdl_SetWindowSize(window , w*2,
-      //		     h);
-      //Create renderer for window
-      //The window renderer
-      SDL_Renderer* gRenderer = NULL;
+  //    if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
+  //      {
+  //        printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
+  //      }
+  //    else
+  //      {
+  //        //Create window
+  //        window = SDL_CreateWindow( "Raycaster", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN );
+  //        // Sdl_SetWindowSize(window , w*2,
+  //        //		     h);
+  //        //Create renderer for window
+  //        //The window renderer
+  //  
+  //    //The surface contained by the window
+  //  
+  //  
+  // 	gRenderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED );
+  //        
+  //  
+  //        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother
+  //        SDL_RenderSetLogicalSize(gRenderer, 512, 512);
+  //  
+  //        
+  //  
+  //        SDL_Texture *texture = SDL_CreateTexture(gRenderer,
+  //  					       SDL_PIXELFORMAT_ARGB8888,
+  //  					       SDL_TEXTUREACCESS_STREAMING,
+  //  					       512, 512);
+  //  
+  // 	// SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormat(0, 512, 512, 32, SDL_PIXELFORMAT_ARGB8888);
+  // 	SDL_Surface *surface = SDL_CreateRGBSurface(0, 512, 512, 32,
+  //                                        0x00FF0000,
+  //                                        0x0000FF00,
+  //                                        0x000000FF,
+  //                                        0xFF000000);
+  //        //update_pixel(surface, 0, 512/2);
 
-  //The surface contained by the window
-
-
-      
-      gRenderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED );
-
-      SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
-      SDL_RenderSetLogicalSize(gRenderer, 512, 512);
-
-      
-
-      SDL_Texture *texture = SDL_CreateTexture(gRenderer,
-					       SDL_PIXELFORMAT_ARGB32,
-					       SDL_TEXTUREACCESS_STREAMING,
-					       512, 512);
-      SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormat(0, 512, 512, 32, SDL_PIXELFORMAT_ARGB32);
-      draw_pixel(surface, 0, 512/2);
-      SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
-      SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-      SDL_RenderClear(gRenderer);
-      SDL_RenderCopy(gRenderer, texture, NULL, NULL);
-      SDL_RenderPresent(gRenderer);
-
-      if( window == NULL )
-        {
-	  printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
-        }
-      else
-        {
-	  //While application is runninG
-            while( !quit )
-            {
+  // 	//Uint32 blue = SDL_MapRGBA(surface->format, 255, 0, 0, 0);
+  // 	SDL_Color blue = { .r = 0, .g = 0, .b = 255, .a = 255};
+  // 	Uint32 bluei = SDL_MapRGB(surface->format, blue.r, blue.g, blue.b);
+  // 	//std::cout << blue;
+  //	Uint32 *tp = (Uint32*) surface->pixels+((0*512) + 512/2);
+  //	*tp = 0xFF00FF00;
 
 
-	      // SDL_UpdateTexture(texture, NULL, screen->pixels, screen->pitch);
-	      //  SDL_RenderClear(gRenderer);
-	      // SDL_RenderCopy(gRenderer, texture, NULL, NULL);
-	      // SDL_RenderPresent(gRenderer);
+  //        SDL_UpdateTexture(texture, NULL, surface->pixels, 512*4);
+  //        SDL_SetRenderDrawColor(gRenderer, 255, 0, 255, 255);
+  //        SDL_RenderClear(gRenderer);
+  //        SDL_RenderCopy(gRenderer, texture, NULL, NULL);
+  //        
+  //	 SDL_RenderPresent(gRenderer);
+  //Uint32 blue = SDL_MapRGBA(surface->format, 255, 0, 0, 255);
+  // SDL_memset(surface->pixels, 0xFF0000FF, surface->h * surface->pitch);
+  //lineseg seg = lineseg(10, 10, 502, 10);
 
-                //Handle events on queue
-                while( SDL_PollEvent( &e ) != 0 )
-                {
+  //lineseg seg1 = lineseg(10, 10, 10, 502);
+
+  //Init seg list with bounding border
+  std::vector<lineseg> segs(1, lineseg(10, 10, 502, 10, 0xFF00FF00));
+  segs.push_back(lineseg(10, 10, 10, 502, 0xFF00FF00));
+  segs.push_back(lineseg(10, 502, 502, 502, 0xFF00FF00));
+  segs.push_back(lineseg(502, 502, 502, 10, 0xFF00FF00));
+
+  // Walls surrounding player
+
+  // Left Wall
+  segs.push_back(lineseg((512/2 -50), (512/2), (512/2 - 50), (512/2 - 50), 0xFF0000FF));
+  segs.push_back(lineseg((512/2 +50), (512/2), (512/2 + 50), (512/2 - 50), 0xFFFF0000));
+  segs.push_back(lineseg((512/2 +50), (512/2-50), (512/2 - 50), (512/2 - 50), 0xFF00FF00));
+
+
+
+  //segs.push_back(lineseg(502, 10, 502, 10));
+  //line(seg.x1, seg.y1, seg.x2, seg.y2,surface, 0xFF00FF00);
+  update_pixel(surface, 0xFFFF0000, 512/2, 512/2 );
+  //line(seg1.x1, seg1.y1, seg1.x2, seg1.y2,surface, 0xFF00FF00);
+  for(auto s : segs) {
+    line(s.x1, s.y1, s.x2, s.y2, surface, s.color);
+  }
+  draw_screen(surface, texture, gRenderer);
+
+	if( window == NULL )
+	  {
+	    printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
+	  }
+	else
+	  {
+	    //While application is runninG
+	    while( !quit )
+	      {
+
+
+	  // SDL_UpdateTexture(texture, NULL, screen->pixels, screen->pitch);
+	  //  SDL_RenderClear(gRenderer);
+	  // SDL_RenderCopy(gRenderer, texture, NULL, NULL);
+	  // SDL_RenderPresent(gRenderer);
+
+	  //Handle events on queue
+	  while( SDL_PollEvent( &e ) != 0 )
+	    {
 		  
-                    //User requests quit
-                    if( e.type == SDL_QUIT )
-                    {
-                        quit = true;
-                    }
+	      //User requests quit
+	      if( e.type == SDL_QUIT )
+		{
+		  quit = true;
+		}
 
 
 
-		    if (e.type == SDL_WINDOWEVENT) {
-		      switch (e.window.event) {
-		      case SDL_WINDOWEVENT_SHOWN:
-			std::cout << "shown" << std::endl;
-			break;
-		      case SDL_WINDOWEVENT_HIDDEN:
-			std::cout << "Hidden" << std::endl;
-			break;
-		      case SDL_WINDOWEVENT_EXPOSED:
-			std::cout << "Exposed" << std::endl;
-			break;
-		      case SDL_WINDOWEVENT_MOVED:
-			std::cout << "Moved" << std::endl;
-			break;
-		      case SDL_WINDOWEVENT_RESIZED:
-			std::cout << "Resized" << std::endl;
-			//SDL_GetWindowSize(window, &wid, &hei);
-			//SDL_SetWindowSize(window, wid, hei);
-			std::cout << w << h;
+	      if (e.type == SDL_WINDOWEVENT) {
+		switch (e.window.event) {
+		case SDL_WINDOWEVENT_SHOWN:
+		  std::cout << "shown" << std::endl;
+		  break;
+		case SDL_WINDOWEVENT_HIDDEN:
+		  std::cout << "Hidden" << std::endl;
+		  break;
+		case SDL_WINDOWEVENT_EXPOSED:
+		  std::cout << "Exposed" << std::endl;
+		  break;
+		case SDL_WINDOWEVENT_MOVED:
+		  std::cout << "Moved" << std::endl;
+
+		  break;
+		case SDL_WINDOWEVENT_RESIZED:
+		  std::cout << "Resized" << std::endl;
+		  //SDL_SetWindowSize(window, 1000,
+		  //   1000);
+
+		  draw_screen(surface, texture, gRenderer);
+			  //SDL_GetWindowSize(window, &wid, &hei);
+		  //SDL_SetWindowSize(window, wid, hei);
+		  std::cout << w << h;
 
 
 			
-			//	SDL_RenderClear( gRenderer );
-			//SDL_RenderPresent( gRenderer );
-			break;
-		      case SDL_WINDOWEVENT_SIZE_CHANGED:
-			std::cout << "Size changed:" << std::endl;
-			break;
-		      case SDL_WINDOWEVENT_MINIMIZED:
-			std::cout << "Minim" << std::endl;
-			break;
-		      case SDL_WINDOWEVENT_MAXIMIZED:
-			std::cout << "Maxim" << std::endl;
-			break;
-		      case SDL_WINDOWEVENT_RESTORED:
-			std::cout << "Restored" << std::endl;
-			break;
-		      case SDL_WINDOWEVENT_ENTER:
-			//std::cout << "Here" << std::endl;
-			break;
-		      case SDL_WINDOWEVENT_LEAVE:
-			//std::cout << "Here" << std::endl;
-			break;
-		      case SDL_WINDOWEVENT_FOCUS_GAINED:
-			std::cout << "Focused" << std::endl;
-			break;
-		      case SDL_WINDOWEVENT_FOCUS_LOST:
-			//std::cout << "Here" << std::endl;
-			break;
-		      case SDL_WINDOWEVENT_CLOSE:
-			std::cout << "Closed" << std::endl;
-			break;
-		      }
-		    }
+		  //	SDL_RenderClear( gRenderer );
+		  //SDL_RenderPresent( gRenderer );
+		  break;
+		case SDL_WINDOWEVENT_SIZE_CHANGED:
+		  std::cout << "Size changed:" << std::endl;
+		  break;
+		case SDL_WINDOWEVENT_MINIMIZED:
+		  std::cout << "Minim" << std::endl;
+		  break;
+		case SDL_WINDOWEVENT_MAXIMIZED:
+		  std::cout << "Maxim" << std::endl;
+		  break;
+		case SDL_WINDOWEVENT_RESTORED:
+		  std::cout << "Restored" << std::endl;
+		  break;
+		case SDL_WINDOWEVENT_ENTER:
+		  //std::cout << "Here" << std::endl;
+		  break;
+		case SDL_WINDOWEVENT_LEAVE:
+		  //std::cout << "Here" << std::endl;
+		  break;
+		case SDL_WINDOWEVENT_FOCUS_GAINED:
+		  std::cout << "Focused" << std::endl;
+		  break;
+		case SDL_WINDOWEVENT_FOCUS_LOST:
+		  //std::cout << "Here" << std::endl;
+		  break;
+		case SDL_WINDOWEVENT_CLOSE:
+		  std::cout << "Closed" << std::endl;
+		  break;
 		}
-		//Get window surface
-		//screenSurface = SDL_GetWindowSurface( window );
-
-		//get window size
-		//SDL_GetRendererOutputSize(gRenderer, &wid, &hei);
-	  
-		//Fill the surface white
-		//SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface.format, 0xFF, 0xFF, 0xFF ) );
-            
-		//Update the surface
-		//SDL_UpdateWindowSurface( window );
-
-
-
-	  
-	      	// Grenderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED );
-		
-		//Render(Grenderer, h, w);
+	      
 	    }
-        }
-    }	
+	  //Get window surface
+	  //screenSurface = SDL_GetWindowSurface( window );
+
+	  //get window size
+	  //SDL_GetRendererOutputSize(gRenderer, &wid, &hei);
+	  
+	  //Fill the surface white
+	  //SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface.format, 0xFF, 0xFF, 0xFF ) );
+            
+	  //Update the surface
+	  //SDL_UpdateWindowSurface( window );
+
+
+
+	  
+	  // Grenderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED );
+		
+	  //Render(Grenderer, h, w);
+	      }
+    
+	  }
+       }
   //Destroy window
 
 
-  std::cout << wid << hei;
+	std::cout << wid << hei;
   
   SDL_DestroyWindow( window );
-
+  
   //Quit SDL subsystems
   SDL_Quit();
   
