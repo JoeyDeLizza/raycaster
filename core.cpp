@@ -10,7 +10,7 @@ void initialize(SDL_Window **w, SDL_Renderer **r, SDL_Surface **s, SDL_Texture *
   else
     {
       //Create window
-      *w = SDL_CreateWindow( "Raycaster", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 512, 512, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+      *w = SDL_CreateWindow( "Raycaster", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 512, 512, SDL_WINDOW_SHOWN );
       // Sdl_SetWindowSize(window , w*2,
       //		     h);
       //Create renderer for window

@@ -1,3 +1,6 @@
+#ifndef CORE_H
+#define CORE_H
+
 #include <iostream>
 #include <fstream>
 #include <ostream>
@@ -6,8 +9,11 @@
 #include <cstdint>
 #include <cassert>
 #include "graphics.h"
-#include "map.h"
 #include "SDL2/SDL.h"
-#include "lineseg.h"
+#include "vec2.h"
+#include "geometry.h"
+#include "coord.h"
 
 void initialize(SDL_Window **w, SDL_Renderer **r, SDL_Surface **s, SDL_Texture **t);
+
+#endif
