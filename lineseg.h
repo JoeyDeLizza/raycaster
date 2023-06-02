@@ -1,7 +1,18 @@
+#ifndef POINT_H
+#define POINT_H
+
+#include "point.h"
+#include <cstdint>
+#include "vec2.h"
+
 class lineseg {
- public:
-  
-  int x1, y1, x2, y2;
-  Uint32 color;
-  lineseg(int _x1, int _y1, int _x2, int _y2, Uint32 _color) : x1(_x1), y1(_y1), x2(_x2), y2(_y2), color(_color) {}
+public:
+  i_point p0, p1;
+  uint32_t color;
+  lineseg(i_point _p0, i_point _p1, uint32_t _color)
+    : p0(_p0), p1(_p1), color(_color) {}
+
+  bool operator<(const lineseg& l);
 };
+
+#endif

@@ -10,6 +10,9 @@
 //#include "SDL2/SDL.h"
 #include "core.h"
 #include "lineseg.h"
+#include "point.h"
+#include <math.h>
+#define PI 3.14159265
 
 
 uint32_t pack_color(const uint8_t r, const uint8_t g, const uint8_t b,
@@ -22,40 +25,42 @@ void draw_rectangle(const int x, const int y, const int img_width, const int img
                     const int rect_height, const uint32_t c, std::vector<uint32_t> &framebuffer);
 void render(SDL_Renderer* r, int h, int w);
 
+vec2 rotate(vec2 u, double ang);
+
+//double lin_interp(double x, double xi, double xi2, double yi, double yi2); 
+
 
 int main(int argc, char **argv) {
   int h = 512;
   int w = 512;
 
-  uint8_t a;
-  std::vector<uint32_t> framebuffer(h*w, 255);
-  for(int i = 0; i < h; i++) {
-    for(int j = 0; j < w; j++) {
-      uint8_t r, g, b;
-      r = 255*i/(float)w;
-      g = 255*j/(float)h;
-      b = 0;
-      framebuffer[i+j*w] = pack_color(r, g, b, a);
-    }
-  }
-  Cell white = Cell(pack_color(255, 255, 255));
-  std::vector<Cell> cells(16*16, white);
-  Map m = Map(cells, 16, 16);
-  uint32_t c = pack_color(255,255,255);
-  draw_rectangle(50,50,h,w,5,5,c, framebuffer);
-  //map m = map(cells, 16, 16);
-  drop_ppm_image("image.ppm", framebuffer, h, w);
-  m.drawCell(0,0, framebuffer, white);
-  drop_ppm_image("image2.ppm", framebuffer, h, w);
+  //  uint8_t a;
+  //  std::vector<uint32_t> framebuffer(h*w, 255);
+  //  for(int i = 0; i < h; i++) {
+  //    for(int j = 0; j < w; j++) {
+  //      uint8_t r, g, b;
+  //      r = 255*i/(float)w;
+  //      g = 255*j/(float)h;
+  //      b = 0;
+  //      framebuffer[i+j*w] = pack_color(r, g, b, a);  //    }
+  //  }
+  //  Cell white = Cell(pack_color(255, 255, 255));
+  //  std::vector<Cell> cells(16*16, white);
+  //  Map m = Map(cells, 16, 16);
+  //  uint32_t c = pack_color(255,255,255);
+  //  draw_rectangle(50,50,h,w,5,5,c, framebuffer);
+  //  //map m = map(cells, 16, 16);
+  //  drop_ppm_image("image.ppm", framebuffer, h, w);
+  //  m.drawCell(0,0, framebuffer, white);
+  //  drop_ppm_image("image2.ppm", framebuffer, h, w);
 
-  //The window we'll be rendering to
-  SDL_Window* window = NULL;
+  // The window we'll be rendering to
+  SDL_Window *window = NULL;
 
+  SDL_Renderer *gRenderer = NULL;
+  SDL_Surface *mapsurface = NULL;
+  SDL_Texture *texture = NULL;
 
-  SDL_Renderer* gRenderer = NULL;
-  SDL_Surface* surface = NULL;
-  SDL_Texture* texture = NULL;
-    
   //Main loop flag
   bool quit = false;
 
@@ -64,7 +69,7 @@ int main(int argc, char **argv) {
 
 
   int wid, hei;
-  initialize(&window, &gRenderer, &surface, &texture); 
+  initialize(&window, &gRenderer, &mapsurface, &texture); 
   //Initialize SDL
   //    if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
   //      {
@@ -124,28 +129,156 @@ int main(int argc, char **argv) {
   //lineseg seg1 = lineseg(10, 10, 10, 502);
 
   //Init seg list with bounding border
-  std::vector<lineseg> segs(1, lineseg(10, 10, 502, 10, 0xFF00FF00));
-  segs.push_back(lineseg(10, 10, 10, 502, 0xFF00FF00));
-  segs.push_back(lineseg(10, 502, 502, 502, 0xFF00FF00));
-  segs.push_back(lineseg(502, 502, 502, 10, 0xFF00FF00));
+  std::vector<lineseg> segs(1, lineseg(i_point(10, 10), i_point(502, 10), 0xFFFF0000));
+  segs.push_back(lineseg(i_point(10, 10), i_point(10, 502),0xFF00FF00));
+  //segs.push_back(lineseg(i_point(10, 502), i_point(502, 502), 0xFF0000FF));
+  segs.push_back(lineseg(i_point(502, 502), i_point(502, 10), 0xFF0000FF));
 
   // Walls surrounding player
+  //segs.push_back(lineseg(i_point( (512/2 -50), (512/2) ), i_point( (512/2 - 50), (512/2 - 50) ), 0xFF0000FF));
+  //segs.push_back(lineseg( i_point( (512/2 +50), (512/2) ), i_point( (512/2 + 50), (512/2 - 50) ), 0xFFFF0000));
+  //segs.push_back(lineseg(i_point( (512/2 +50), (512/2-50) ), i_point( (512/2 - 50), (512/2 - 50) ), 0xFF00FF00));
 
-  // Left Wall
-  segs.push_back(lineseg((512/2 -50), (512/2), (512/2 - 50), (512/2 - 50), 0xFF0000FF));
-  segs.push_back(lineseg((512/2 +50), (512/2), (512/2 + 50), (512/2 - 50), 0xFFFF0000));
-  segs.push_back(lineseg((512/2 +50), (512/2-50), (512/2 - 50), (512/2 - 50), 0xFF00FF00));
+  SDL_Surface* surface = SDL_CreateRGBSurface(0, 512, 512, 32,
+				    0x00FF0000,
+				    0x0000FF00,
+				    0x000000FF,
+				    0xFF000000);
+  SDL_memset(surface->pixels, 0, mapsurface->h * mapsurface->pitch);
 
+  bool mapdisplay = 1;
 
+  vec2 o = vec2(0, 0);
+  vec2 d = vec2(-1, 0);
+  paraLine p = paraLine(o, d);
+  //segs.push_back(lineseg(p.p(0), p.p(100), 0xFF0000FF));
 
+  std::cout << std::endl;
+  vec2 ppp = vec2(450, 100);
+  vec2 u = vec2(-1, 0);
+  vec2 v = vec2(0, -1);
+  u = rotate(u, PI/6);
+  v = rotate(v, PI/6);
+  coord c = coord(ppp, u, v);
+
+  vec2 origin = vec2(300, 300);
   //segs.push_back(lineseg(502, 10, 502, 10));
   //line(seg.x1, seg.y1, seg.x2, seg.y2,surface, 0xFF00FF00);
-  update_pixel(surface, 0xFFFF0000, 512/2, 512/2 );
-  //line(seg1.x1, seg1.y1, seg1.x2, seg1.y2,surface, 0xFF00FF00);
+  vec2 position = vec2(150, 512/2);
+  i_point pp = i_point(150, 150);
+  vec2 angle = vec2(cos(PI/4) , sin(PI/4) );
+  paraLine angleLine = paraLine(o, angle);
+  //segs.push_back(lineseg((angleLine.p(0)), angleLine.p(100),  0xFFFFFF00));
+    std::vector<lineseg> cone;
+
+    std::vector<lineseg> basis;
+    basis.push_back(lineseg(i_point(450, 100), c.vector_to_point(c.local_to_global(vec2(1,0).mul(10))), 0xff00ffff));
+
+    basis.push_back(lineseg(i_point(450, 100), c.vector_to_point(c.local_to_global(vec2(0,1).mul(10))), 0xff00ffff));
+
+    cone.push_back(lineseg((c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(0))))), c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(300)))),  0xFFFFFFFF));
+  angle = vec2(cos(3*PI/4), sin(3*PI/4));
+  angleLine = paraLine(o, angle);
+  cone.push_back(lineseg((c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(0))))), c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(300)))),  0xFFFFFF00));
+
+  // update_pixel(mapsurface, 0xFFFF0000, pp.x, pp.y );
+  //update_pixel(mapsurface, 0xFFFFFF00, 265, 256 );
+  //segs.push_back(lineseg(c.vector_to_point(c.global_to_local(p.p(0))), c.vector_to_point(c.global_to_local(p.p(50))), 0xFFFF0000));
+  vec2 a = vec2(1, 2);
+  vec2 a_to_local = c.global_to_local(a);
+  std::cout << std::endl;
+  std::cout << a_to_local.get_x() << "," << a_to_local.get_y();
+  std::vector<lineseg> xbuf(1, lineseg(i_point(0, 0), i_point(0, 0), 0xFFFF0000));
+  std::vector<lineseg> xbufs;
+  xbufs = process_segs(segs, c);
   for(auto s : segs) {
-    line(s.x1, s.y1, s.x2, s.y2, surface, s.color);
+    std::cout << "Looping:" << std::endl;
+    std::cout << s.p0.x << " " << origin.get_x() << std::endl;
+
+    std::cout << s.p0.y << " " << origin.get_x() << std::endl;
+    std::cout << s.p1.x << " " << origin.get_x() << std::endl;
+
+    std::cout << s.p1.y << " " << origin.get_x() << std::endl;
+    // process_seg(s);
+    //    | for each point           |
+    //    |   calculate_angle(point) |
+    //    |   x_to_screenspace(ang)  |
+    //    | for p in between points  |
+    //    |   draw_column(p, z)      |
+    //    |    |
+    //lineseg x = process_seg(s, c);
+
+    //if (x.p0.x >= 0 && x.p0.x <= 512)
+    //  xbufs.push_back(lineseg(x.p0, x.p0, x.color));
+    //if (x.p1.x >= 0 && x.p1.x <= 512)
+    //xbufs.push_back(lineseg(x.p1, x.p1, x.color));
+    
+    if (1) {
+      vec2 l = vec2(s.p0.x, s.p0.y);
+      vec2 loc_l = c.global_to_local(l);
+
+      double ang = atan2( (double) (loc_l.get_y()) ,(double) ( loc_l.get_x()) );
+      std::cout << "Angle p0: " << ang << std::endl;
+      // negative to switch coord space, should find a better way
+      double xpos = lin_interp(ang, PI/4, 3 * PI/4, 0, 512);
+      std::cout << "xpos" << "\n";
+      std::cout << xpos << "\n";
+        if (xpos >= 0 && xpos <= 512) {
+	  // xbuf.push_back(lineseg(i_point(xpos, 512/2), i_point(xpos, 512/2), 0xFFFF0000));
+	 }
+      //if(ang >= 0)
+	//	segs.push_back(lineseg(i_point(300, 300), s.p0,  0xFFFFFFFF));
+      //	}
+      if (1) {
+	vec2 l1 = vec2(s.p1.x, s.p1.y);
+	vec2 loc_l1 = c.global_to_local(l1);
+	double ang1 = atan2( (double) (loc_l1.get_y()) ,(double) ( loc_l1.get_x()) );
+	std::cout << "Anglep1: " << ang1 << std::endl;
+	double xpos1 = lin_interp(ang1, PI/4, 3 * PI/4, 0, 512);
+	if (xpos1 >= 0 && xpos1 <= 512) {
+	  std::cout << "// XXX: pos1" << "\n";
+	  std::cout << xpos1 << "\n";
+	    
+	  //xbuf.push_back(lineseg(i_point(xpos1, 512/2), i_point(xpos1, 512/2), 0xFFFF0000));
+	  }
+
+      //if(ang1 >=0)
+	//segs.push_back(lineseg(i_point(300, 300), s.p1,  0xFF00FFFF));
+	//}
+      
+      //segs.push_back(lineseg(c.vector_to_point(c.global_to_local(p.p(0))), c.vector_to_point(c.global_to_local(p.p(100))), 0xFFFF0000));
+      }
+    }
   }
-  draw_screen(surface, texture, gRenderer);
+  //line(seg1.x1, seg1.y1, seg1.x2, seg1.y2,surface, 0xFF00FF00);
+  for(auto s : xbuf) {
+    
+    //line(s.p0, s.p1, surface, s.color);
+    
+  }
+  for(auto s : xbufs) {
+    std::cout << s.p0.x << "," << s.p0.y << "\n";
+    std::cout << s.p1.x << "," << s.p1.y << "\n";
+
+
+     line(s.p0, s.p1, surface, s.color);
+  }
+  for(auto s : segs) {
+    line(s.p0, s.p1, mapsurface, s.color);
+
+    //std::cout << "P0 x: " << s.p0.x << " Angle: " << atan( std::abs(pp.x - s.p0.y) / std::abs(pp.x - s.p0.x) )-PI;
+
+    //std::cout << "P1 x: " << s.p1.x << " Angle: " << atan( std::abs(pp.x - s.p1.y) / std::abs(pp.x - s.p1.x) )-PI;
+  }
+  for(auto s : cone) {
+    
+    line(s.p0, s.p1, mapsurface, s.color);
+  }
+  for(auto s : basis) {
+    
+    line(s.p0, s.p1, mapsurface, s.color);
+  }
+  draw_screen(mapsurface, texture, gRenderer);
 
 	if( window == NULL )
 	  {
@@ -175,65 +308,20 @@ int main(int argc, char **argv) {
 
 
 
-	      if (e.type == SDL_WINDOWEVENT) {
-		switch (e.window.event) {
-		case SDL_WINDOWEVENT_SHOWN:
-		  std::cout << "shown" << std::endl;
-		  break;
-		case SDL_WINDOWEVENT_HIDDEN:
-		  std::cout << "Hidden" << std::endl;
-		  break;
-		case SDL_WINDOWEVENT_EXPOSED:
-		  std::cout << "Exposed" << std::endl;
-		  break;
-		case SDL_WINDOWEVENT_MOVED:
-		  std::cout << "Moved" << std::endl;
+	      switch (e.type) {
+	      case SDL_KEYDOWN:
+		std::cout << "Key press detected" << std::endl;
+		if (mapdisplay) {
+		  
+		  draw_screen(mapsurface, texture, gRenderer);
+		  mapdisplay = !mapdisplay;
 
-		  break;
-		case SDL_WINDOWEVENT_RESIZED:
-		  std::cout << "Resized" << std::endl;
-		  //SDL_SetWindowSize(window, 1000,
-		  //   1000);
-
+		} else {
 		  draw_screen(surface, texture, gRenderer);
-			  //SDL_GetWindowSize(window, &wid, &hei);
-		  //SDL_SetWindowSize(window, wid, hei);
-		  std::cout << w << h;
-
-
-			
-		  //	SDL_RenderClear( gRenderer );
-		  //SDL_RenderPresent( gRenderer );
-		  break;
-		case SDL_WINDOWEVENT_SIZE_CHANGED:
-		  std::cout << "Size changed:" << std::endl;
-		  break;
-		case SDL_WINDOWEVENT_MINIMIZED:
-		  std::cout << "Minim" << std::endl;
-		  break;
-		case SDL_WINDOWEVENT_MAXIMIZED:
-		  std::cout << "Maxim" << std::endl;
-		  break;
-		case SDL_WINDOWEVENT_RESTORED:
-		  std::cout << "Restored" << std::endl;
-		  break;
-		case SDL_WINDOWEVENT_ENTER:
-		  //std::cout << "Here" << std::endl;
-		  break;
-		case SDL_WINDOWEVENT_LEAVE:
-		  //std::cout << "Here" << std::endl;
-		  break;
-		case SDL_WINDOWEVENT_FOCUS_GAINED:
-		  std::cout << "Focused" << std::endl;
-		  break;
-		case SDL_WINDOWEVENT_FOCUS_LOST:
-		  //std::cout << "Here" << std::endl;
-		  break;
-		case SDL_WINDOWEVENT_CLOSE:
-		  std::cout << "Closed" << std::endl;
-		  break;
+		  mapdisplay = !mapdisplay;
 		}
-	      
+	      default:
+		break;
 	    }
 	  //Get window surface
 	  //screenSurface = SDL_GetWindowSurface( window );
@@ -264,6 +352,7 @@ int main(int argc, char **argv) {
   
   SDL_DestroyWindow( window );
   
+  // std::cout << "ANGLELINE: " <<  angleLine.p(0).x << angleLine.p(0).y << std::endl;
   //Quit SDL subsystems
   SDL_Quit();
   
@@ -316,5 +405,12 @@ void drop_ppm_image(const std::string filename, const std::vector<uint32_t> pixe
   file.close();
 }
 
+vec2 rotate(vec2 u, double ang) {
+  return vec2(u.get_x() * cos(ang) -u.get_y() * sin(ang), u.get_y() * cos(ang) + u.get_x() * sin(ang));
+}
 
+//double lin_interp(double x, double xi, double xi2, double yi, double yi2) {
+//
+//  return yi + ( (x - xi) / (xi2 - xi) ) * (yi2 -yi);
+//}
   

@@ -1,7 +1,6 @@
 //i_point
 #ifndef I_POINT_H
 #define I_POINT_H
-
 class i_point {
 
  public:

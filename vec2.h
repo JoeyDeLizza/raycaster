@@ -2,11 +2,14 @@
 #define VEC2_H
 
 #include <math.h>
+#include "point.h"
 //2-Dimensional vector
 
 class vec2 {
  public:
  vec2(double _x, double _y) : x(_x), y(_y) {}
+
+  vec2(i_point p) : x(p.x), y(p.y) {}
 
   vec2() : x(0), y(0) {}
 
