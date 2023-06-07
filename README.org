@@ -1,0 +1,27 @@
+#+AUTHOR: Joey DeLizza
+* History 
+
+Way back before there were modern GPUs to handle the complexity of rendering and texture mapping, graphics programmers had to use all sorts of
+rendering techniques.  One technique called raycasting was a popular method for rendering a pseudo 3D scene from a 2D scene.  Early first person
+shooters like Wolfenstein 3D used this technique to render 3D worlds.  iD Software uses an altered form of rendering that takes similar restrictions
+as raycasting but uses an alternative rendering technique using Binary Search Partition trees.
+
+* Implementation
+
+Raycasting works by shooting n rays between the FOV of the player where n is equal to width in pixels of the screen being rendered to. If rendering
+at a resolution of 320 by 200 it would cast 320 rays interpolated between the field of view. A ray starts at the orgin of the player's position and
+iterativley grows longer until it touches an wall.  The length of the ray gives us the distance from the player.Each ray represents the column of
+pixels to be rendered in screen space. The heights of the columns are inversley proportional to the distance from the player, that means the farther
+away it is the smaller it will be. Below is a crude drawing of what a 2D scene would like like projected into screen space.
+[[./Docs/Graphic1.png]]
+
+My implementation follows Dooms software more closley than actual ray casting.  Instead of casting n rays between the fov, we just calculate the angles
+of the vertices and project that into the x coordinates in screen space using linear interpolation.  Continueing with a resolution of 320 by 200 the x
+coordinates for screen space go from [0..319].  If our FOV is 90 degrees, then the mapping of our angles to screen space is interpolated from 45 degrees
+to 135 degree, where 45 is mapped to 0 and 135 is mapped to 319. Getting the distances from the vertices is pretty simple once we have a vector class.
+Once we have have the distances from both vertices we can just simply use linear interpolation to get the distances in between.
+
+* Demo
+[[./Docs/screenspace.gif]] [[./Docs/map.gif]]
+
+
