@@ -27,6 +27,8 @@ class vec2 {
 
   double get_y();
 
+  double proj(double ang, vec2 b);
+
   vec2 operator+(vec2 b);
 
   vec2 operator-();

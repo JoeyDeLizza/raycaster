@@ -34,6 +34,10 @@ double vec2::get_y() {
   return this->y;
 }
 
+double vec2::proj(double ang, vec2 b) {
+  double a_1 = this->len() * cos(ang);
+  return a_1;
+}
 //
 vec2 vec2::operator+(vec2 b) {
   return this->add(b);
