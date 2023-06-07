@@ -12,6 +12,8 @@
 #include "lineseg.h"
 #include "point.h"
 #include <math.h>
+#include <chrono>
+#include <thread>
 #define PI 3.14159265
 
 
@@ -129,15 +131,50 @@ int main(int argc, char **argv) {
   //lineseg seg1 = lineseg(10, 10, 10, 502);
 
   //Init seg list with bounding border
-  std::vector<lineseg> segs(1, lineseg(i_point(10, 10), i_point(502, 10), 0xFFFF0000));
-  segs.push_back(lineseg(i_point(10, 10), i_point(10, 502),0xFF00FF00));
-  //segs.push_back(lineseg(i_point(10, 502), i_point(502, 502), 0xFF0000FF));
-  segs.push_back(lineseg(i_point(502, 502), i_point(502, 10), 0xFF0000FF));
+  std::vector<lineseg> segs(1, lineseg(i_point(10, 10), i_point(50, 10), 0xFFFF0000));
+  // segs.clear();
+  segs.push_back(lineseg(i_point(50, 10), i_point(100, 10),0xFFFF0000));
+  segs.push_back(lineseg(i_point(100, 10), i_point(150, 10),0xFFFF0000));
+  segs.push_back(lineseg(i_point(150, 10), i_point(200, 10),0xFFFF0000));
+  segs.push_back(lineseg(i_point(200, 10), i_point(250, 10),0xFFFF0000));
+
+  segs.push_back(lineseg(i_point(250, 10), i_point(300, 10),0xFFFF0000));
+  segs.push_back(lineseg(i_point(300, 10), i_point(350, 10),0xFFFF0000));
+  segs.push_back(lineseg(i_point(350, 10), i_point(400, 10),0xFFFF0000));
+  segs.push_back(lineseg(i_point(400, 10), i_point(450, 10),0xFFFF0000));
+  segs.push_back(lineseg(i_point(450, 10), i_point(502, 10),0xFFFF0000));
+
+
+
+  // segs.push_back(lineseg(i_point(10, 10), i_point(10, 502),0xFF00FF00));
+  segs.push_back(lineseg(i_point(502, 10), i_point(502, 100), 0xFF0000FF));
+  segs.push_back(lineseg(i_point(502, 100), i_point(502, 200), 0xFF0000FF));
+  segs.push_back(lineseg(i_point(502, 200), i_point(502, 300), 0xFF0000FF));
+  segs.push_back(lineseg(i_point(502, 300), i_point(502, 400), 0xFF0000FF));
+  segs.push_back(lineseg(i_point(502, 400), i_point(502, 502), 0xFF0000FF));
+
+  segs.push_back(lineseg(i_point(10, 502), i_point(100, 502), 0xFF00FF00));
+  segs.push_back(lineseg(i_point(100, 502), i_point(200, 502), 0xFF00FF00));
+  segs.push_back(lineseg(i_point(200, 502), i_point(300, 502), 0xFF00FF00));
+  segs.push_back(lineseg(i_point(300, 502), i_point(400, 502), 0xFF00FF00));
+  segs.push_back(lineseg(i_point(400, 502), i_point(502, 502), 0xFF00FF00));
+
+
+   segs.push_back(lineseg(i_point(10, 10), i_point(10, 100), 0xFF0000FF));
+   segs.push_back(lineseg(i_point(10, 100), i_point(10, 200), 0xFF0000FF));
+   segs.push_back(lineseg(i_point(10, 200), i_point(10, 300), 0xFF0000FF));
+   segs.push_back(lineseg(i_point(10, 300), i_point(10, 400), 0xFF0000FF));
+   segs.push_back(lineseg(i_point(10, 400), i_point(10, 502), 0xFF0000FF));
+
+
+
+
+
 
   // Walls surrounding player
-  //segs.push_back(lineseg(i_point( (512/2 -50), (512/2) ), i_point( (512/2 - 50), (512/2 - 50) ), 0xFF0000FF));
-  //segs.push_back(lineseg( i_point( (512/2 +50), (512/2) ), i_point( (512/2 + 50), (512/2 - 50) ), 0xFFFF0000));
-  //segs.push_back(lineseg(i_point( (512/2 +50), (512/2-50) ), i_point( (512/2 - 50), (512/2 - 50) ), 0xFF00FF00));
+  segs.push_back(lineseg(i_point( (512/2 -50), (512/2) ), i_point( (512/2 - 50), (512/2 - 50) ), 0xFF0000FF));
+  segs.push_back(lineseg( i_point( (512/2 +50), (512/2) ), i_point( (512/2 + 50), (512/2 - 50) ), 0xFFFF0000));
+  segs.push_back(lineseg(i_point( (512/2 +50), (512/2-50) ), i_point( (512/2 - 50), (512/2 - 50) ), 0xFF00FF00));
 
   SDL_Surface* surface = SDL_CreateRGBSurface(0, 512, 512, 32,
 				    0x00FF0000,
@@ -154,11 +191,11 @@ int main(int argc, char **argv) {
   //segs.push_back(lineseg(p.p(0), p.p(100), 0xFF0000FF));
 
   std::cout << std::endl;
-  vec2 ppp = vec2(450, 100);
+  vec2 ppp = vec2(512/2, 512/2+100);
   vec2 u = vec2(-1, 0);
   vec2 v = vec2(0, -1);
-  u = rotate(u, PI/6);
-  v = rotate(v, PI/6);
+  u = rotate(u, PI);
+  v = rotate(v, PI);
   coord c = coord(ppp, u, v);
 
   vec2 origin = vec2(300, 300);
@@ -169,17 +206,42 @@ int main(int argc, char **argv) {
   vec2 angle = vec2(cos(PI/4) , sin(PI/4) );
   paraLine angleLine = paraLine(o, angle);
   //segs.push_back(lineseg((angleLine.p(0)), angleLine.p(100),  0xFFFFFF00));
-    std::vector<lineseg> cone;
+  std::vector<lineseg> border;
+  // left border
+  for(int i = 0; i < 20; i++) {
+    
+    border.push_back(lineseg(i_point(i, 0), i_point(i, 512), 0xFFFFFFFF));
+  }
 
-    std::vector<lineseg> basis;
-    basis.push_back(lineseg(i_point(450, 100), c.vector_to_point(c.local_to_global(vec2(1,0).mul(10))), 0xff00ffff));
+  // Top Border
+  for(int i = 0; i < 20; i++) {
+    
+    border.push_back(lineseg(i_point(0, i), i_point(512, i), 0xFFFFFFFF));
+  }
 
-    basis.push_back(lineseg(i_point(450, 100), c.vector_to_point(c.local_to_global(vec2(0,1).mul(10))), 0xff00ffff));
+  // Right Border
+  for(int i = 512-20; i < 512; i++) {
+    
+    border.push_back(lineseg(i_point(i, 0), i_point(i, 512), 0xFFFFFFFF));
+  }
 
-    cone.push_back(lineseg((c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(0))))), c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(300)))),  0xFFFFFFFF));
-  angle = vec2(cos(3*PI/4), sin(3*PI/4));
-  angleLine = paraLine(o, angle);
-  cone.push_back(lineseg((c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(0))))), c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(300)))),  0xFFFFFF00));
+  for(int i = 512-20; i < 512; i++) {
+    
+    border.push_back(lineseg(i_point(0, i), i_point(512, i), 0xFFFFFFFF));
+  }
+  
+  std::vector<lineseg> cone;
+
+  std::vector<lineseg> basis;
+  basis.push_back(lineseg(i_point(100, 100), c.vector_to_point(c.local_to_global(vec2(1,0).mul(10))), 0xff00ffff));
+  
+  basis.push_back(lineseg(i_point(100, 100), c.vector_to_point(c.local_to_global(vec2(0,1).mul(10))), 0xff00ffff));
+  
+    //float t2 = 1.0;
+    //while(!check_pixel(mapsurface, texture, angleLine.p(t2))) {
+      //t2 = t2 +.01;
+	//}
+    //cone.push_back(lineseg((c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(0))))), c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(t2)))),  0xFFFFFF00));
 
   // update_pixel(mapsurface, 0xFFFF0000, pp.x, pp.y );
   //update_pixel(mapsurface, 0xFFFFFF00, 265, 256 );
@@ -191,14 +253,14 @@ int main(int argc, char **argv) {
   std::vector<lineseg> xbuf(1, lineseg(i_point(0, 0), i_point(0, 0), 0xFFFF0000));
   std::vector<lineseg> xbufs;
   xbufs = process_segs(segs, c);
-  for(auto s : segs) {
-    std::cout << "Looping:" << std::endl;
-    std::cout << s.p0.x << " " << origin.get_x() << std::endl;
+  //for(auto s : segs) {
+  // std::cout << "Looping:" << std::endl;
+  //  std::cout << s.p0.x << " " << origin.get_x() << std::endl;
 
-    std::cout << s.p0.y << " " << origin.get_x() << std::endl;
-    std::cout << s.p1.x << " " << origin.get_x() << std::endl;
+  //  std::cout << s.p0.y << " " << origin.get_x() << std::endl;
+  //  std::cout << s.p1.x << " " << origin.get_x() << std::endl;
 
-    std::cout << s.p1.y << " " << origin.get_x() << std::endl;
+  // std::cout << s.p1.y << " " << origin.get_x() << std::endl;
     // process_seg(s);
     //    | for each point           |
     //    |   calculate_angle(point) |
@@ -213,43 +275,43 @@ int main(int argc, char **argv) {
     //if (x.p1.x >= 0 && x.p1.x <= 512)
     //xbufs.push_back(lineseg(x.p1, x.p1, x.color));
     
-    if (1) {
-      vec2 l = vec2(s.p0.x, s.p0.y);
-      vec2 loc_l = c.global_to_local(l);
+    //   if (1) {
+    //     vec2 l = vec2(s.p0.x, s.p0.y);
+    //     vec2 loc_l = c.global_to_local(l);
 
-      double ang = atan2( (double) (loc_l.get_y()) ,(double) ( loc_l.get_x()) );
-      std::cout << "Angle p0: " << ang << std::endl;
-      // negative to switch coord space, should find a better way
-      double xpos = lin_interp(ang, PI/4, 3 * PI/4, 0, 512);
-      std::cout << "xpos" << "\n";
-      std::cout << xpos << "\n";
-        if (xpos >= 0 && xpos <= 512) {
-	  // xbuf.push_back(lineseg(i_point(xpos, 512/2), i_point(xpos, 512/2), 0xFFFF0000));
-	 }
-      //if(ang >= 0)
-	//	segs.push_back(lineseg(i_point(300, 300), s.p0,  0xFFFFFFFF));
-      //	}
-      if (1) {
-	vec2 l1 = vec2(s.p1.x, s.p1.y);
-	vec2 loc_l1 = c.global_to_local(l1);
-	double ang1 = atan2( (double) (loc_l1.get_y()) ,(double) ( loc_l1.get_x()) );
-	std::cout << "Anglep1: " << ang1 << std::endl;
-	double xpos1 = lin_interp(ang1, PI/4, 3 * PI/4, 0, 512);
-	if (xpos1 >= 0 && xpos1 <= 512) {
-	  std::cout << "// XXX: pos1" << "\n";
-	  std::cout << xpos1 << "\n";
-	    
-	  //xbuf.push_back(lineseg(i_point(xpos1, 512/2), i_point(xpos1, 512/2), 0xFFFF0000));
-	  }
+    //     double ang = atan2( (double) (loc_l.get_y()) ,(double) ( loc_l.get_x()) );
+    //     std::cout << "Angle p0: " << ang << std::endl;
+    //     // negative to switch coord space, should find a better way
+    //     double xpos = lin_interp(ang, PI/4, 3 * PI/4, 0, 511);
+    //     std::cout << "xpos" << "\n";
+    //     std::cout << xpos << "\n";
+    //       if (xpos >= 0 && xpos <= 512) {
+    //	  // xbuf.push_back(lineseg(i_point(xpos, 512/2), i_point(xpos, 512/2), 0xFFFF0000));
+    //	 }
+    //     //if(ang >= 0)
+    //	//	segs.push_back(lineseg(i_point(300, 300), s.p0,  0xFFFFFFFF));
+    //     //	}
+    //     if (1) {
+    //	vec2 l1 = vec2(s.p1.x, s.p1.y);
+    //	vec2 loc_l1 = c.global_to_local(l1);
+    //	double ang1 = atan2( (double) (loc_l1.get_y()) ,(double) ( loc_l1.get_x()) );
+    //	std::cout << "Anglep1: " << ang1 << std::endl;
+    //	double xpos1 = lin_interp(ang1, PI/4, 3 * PI/4, 0, 511);
+    //	if (xpos1 >= 0 && xpos1 <= 512) {
+    //	  std::cout << "// XXX: pos1" << "\n";
+    //	  std::cout << xpos1 << "\n";
+    //	    
+    //	  //xbuf.push_back(lineseg(i_point(xpos1, 512/2), i_point(xpos1, 512/2), 0xFFFF0000));
+    //	  }
 
       //if(ang1 >=0)
 	//segs.push_back(lineseg(i_point(300, 300), s.p1,  0xFF00FFFF));
 	//}
       
       //segs.push_back(lineseg(c.vector_to_point(c.global_to_local(p.p(0))), c.vector_to_point(c.global_to_local(p.p(100))), 0xFFFF0000));
-      }
-    }
-  }
+  // }
+  // }
+  //}
   //line(seg1.x1, seg1.y1, seg1.x2, seg1.y2,surface, 0xFF00FF00);
   for(auto s : xbuf) {
     
@@ -270,15 +332,44 @@ int main(int argc, char **argv) {
 
     //std::cout << "P1 x: " << s.p1.x << " Angle: " << atan( std::abs(pp.x - s.p1.y) / std::abs(pp.x - s.p1.x) )-PI;
   }
+
+  float t1 = 1.0;
+  //while(!check_pixel(mapsurface, texture,  c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(t1)))))) {
+  t1 = 10;
+    //  std::cout << t1 << "\n";
+
+    //}
+  //t1 = 95;
+  i_point tp = i_point(10, 10);
+  std::cout << check_pixel(mapsurface ,texture, 10, 10);
+  std::cout << t1 << "\n";
+  std::cout << c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(t1)))).y<< "\n";
+  std::cout <<  check_pixel(mapsurface, texture,  c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(t1))))) << "\n";
+  cone.push_back(lineseg((c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(0))))), c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(t1)))),  0xFFFFFFFF));
+    angle = vec2(cos(3*PI/4), sin(3*PI/4));
+    angleLine = paraLine(o, angle);
+    t1 = 1.00;
+    //while(!check_pixel(mapsurface, texture, c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(t1)))))) {
+    t1 = 10;
+      //	}
+    cone.push_back(lineseg((c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(0))))), c.vector_to_point(c.local_to_global(c.point_to_vector(angleLine.p(t1)))),  0xFFFFFF00));
+
   for(auto s : cone) {
     
     line(s.p0, s.p1, mapsurface, s.color);
   }
   for(auto s : basis) {
     
-    line(s.p0, s.p1, mapsurface, s.color);
+    //line(s.p0, s.p1, mapsurface, s.color);
+  }
+  for(auto s : border) {
+    
+    line(s.p0, s.p1, surface, s.color);
   }
   draw_screen(mapsurface, texture, gRenderer);
+
+  std::cout << "Printing bool" << "\n";
+  std::cout << check_pixel(mapsurface, texture, 10, 10);
 
 	if( window == NULL )
 	  {
@@ -289,12 +380,34 @@ int main(int argc, char **argv) {
 	    //While application is runninG
 	    while( !quit )
 	      {
+			u = rotate(u, PI/30);
+		
+		v = rotate(v, PI/30);
+		
+		        c = coord(ppp, u, v);
+		SDL_memset(surface->pixels, 0, surface->h * surface->pitch);
+		xbufs = process_segs(segs, c);
+		 for(auto s : xbufs) {
+		   //std::cout << s.p0.x << "," << s.p0.y << "\n";
+		//std::cout << s.p1.x << "," << s.p1.y << "\n";
 
 
-	  // SDL_UpdateTexture(texture, NULL, screen->pixels, screen->pitch);
-	  //  SDL_RenderClear(gRenderer);
-	  // SDL_RenderCopy(gRenderer, texture, NULL, NULL);
-	  // SDL_RenderPresent(gRenderer);
+		     line(s.p0, s.p1, surface, s.color);
+		 }
+		for(auto s : border) {
+    
+		   line(s.p0, s.p1, surface, s.color);
+		 }
+
+  
+		draw_screen(surface, texture, gRenderer);
+		 std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+
+		 //SDL_UpdateTexture(texture, NULL, screen->pixels, screen->pitch);
+		 //SDL_RenderClear(gRenderer);
+		 //SDL_RenderCopy(gRenderer, texture, NULL, NULL);
+		 //SDL_RenderPresent(gRenderer);
 
 	  //Handle events on queue
 	  while( SDL_PollEvent( &e ) != 0 )
